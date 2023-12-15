@@ -35,9 +35,11 @@ def clickButton(par_driver, par_xpath, check_button):
         element = WebDriverWait(par_driver, 5).until(EC.presence_of_element_located((By.XPATH, par_xpath)))
         element.click()
         print('BOTAO CLICADO')
+        return True
     else:
          print('BOTAO NÃO EXISTE')
          par_driver.quit()
+         return False
 
 
 #FUNÇÃO PARA VARIAR O TEMPO DE DIGITAÇÃO 

@@ -2,6 +2,8 @@ import requests
 import random
 import json
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 from mainFunctions import clearPopUp, checkElement, typeText, clickButton
 from time import sleep
 
@@ -14,8 +16,8 @@ chrome_options.add_experimental_option("excludeSwitches",["enable-automation"])
 driver = webdriver.Chrome(options=chrome_options)
 
 #CREDENCIAIS PARA ACESSAR A API
-api_key = "CHAVE_DE_ACESSO" #SUA CHAVE PARA ACESSAR A API
-base_url = "LINK_DA_API" #LINK DA SUA API
+api_key = "SUA_CHAVE_DA_API" #SUA CHAVE PARA ACESSAR A API
+base_url = "https://api.maersk.com/reference-data/vessels" #LINK DA SUA API
 headers = {
  "Consumer-Key": api_key
 }
@@ -46,7 +48,7 @@ def set_id_ship(vesselJson):
 ##FUNÇÃO PARA SELECIONAR UM ELEMENTO RANDOMICO DO JSON RECEBIDO
 def jsonVessel(vesselJson):
         value = set_id_ship(vesselJson)
-        if value == None:
+        while value == None:
             value = set_id_ship(vesselJson)
         print('vesselIMONumber ', value)
         return value
@@ -64,7 +66,7 @@ def searchVessels(driver, par_ship, elementoLista):
     sleep(2)
     #VERIFICAR O E ATRIBUIR O XPATH DA BUSCA
     if elementoLista is None:
-        elementolistaClick = '/html/body/div[9]/div[3]/div/div[4]/div[1]/div[2]/div/div/div/div/li/a/div[2]/span'                 
+        elementolistaClick = '/html/body/div[8]/div[3]/div/div[4]/div[1]/div[2]/div/div/div/div/li/a/div[2]/span'                 
     elif i > 0:
         elementolistaClick = '/html/body/div[7]/div[3]/div/div[4]/div[1]/div[2]/div/div/div/div/li/a/div[2]/span'
     else: 
@@ -72,20 +74,22 @@ def searchVessels(driver, par_ship, elementoLista):
     elementoListaExiste = checkElement(driver, elementolistaClick)
 
     if elementoListaExiste:
-        clickButton(driver, elementolistaClick, elementoListaExiste)
-        print('NAVIO ENCONTRADO')
-        return True
+        if clickButton(driver, elementolistaClick, elementoListaExiste):
+            print('NAVIO ENCONTRADO')
+            return True
     else:
         print('NAVIO NÃO ENCONTRADO')
         sleep(2)
-        return False
+        ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+        searchVessels(driver, ship, '/html/body/div[7]/div[3]/div/div[4]/div[1]/div[2]/div/div/div/div/li/a/div[2]/span/span')
+        
 
 busca = searchVessels(driver, ship, None)
 print('++++++++++++++++++++++++++++++++++++++', busca)
 #LOOP PARA REALIZAR 5 BUSCAS
 while i < 5:
     sleep(2)
-    elementolistaClick2 = '/html/body/div[7]/div[3]/div/div[4]/div[1]/div[2]/div/div/div/div/li/a/div[2]/span/span'
+    elementolistaClick2 = '/html/body/div[8]/div[3]/div/div[4]/div[1]/div[2]/div/div/div/div/li/a/div[2]/span/span'
     searchVessels(driver, ship, elementolistaClick2)
     sleep(3)
     i += 1
